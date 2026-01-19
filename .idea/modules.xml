@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/triage/TriageService/TriageService.iml" filepath="$PROJECT_DIR$/triage/TriageService/TriageService.iml" />
       <module fileurl="file://$PROJECT_DIR$/common/common.iml" filepath="$PROJECT_DIR$/common/common.iml" />
       <module fileurl="file://$PROJECT_DIR$/resource/resource.iml" filepath="$PROJECT_DIR$/resource/resource.iml" />
       <module fileurl="file://$PROJECT_DIR$/triage/triage.iml" filepath="$PROJECT_DIR$/triage/triage.iml" />
