@@ -48,3 +48,11 @@ We use a automation script to build and launch all services simultaneously:
 ```bash
 chmod +x run_hospital.sh
 ./run_hospital.sh
+
+To actually test this:
+1. Open ActiveMQ: Run ActiveMQ broker software
+2. Run TriageService: Run the main menthod 
+3. Send a Test: Use a tool like Postman or use this terminal command:
+curl -X POST http://localhost:7001/admit \
+     -H "Content-Type: application/json" \
+     -d '{"patientName": "Lerato Moloi", "triageLevel": "RED"}'

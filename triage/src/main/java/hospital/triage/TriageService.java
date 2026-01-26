@@ -14,6 +14,7 @@ import javax.jms.*;
  * It does 2 things:
  * 1. Provides a REST API using Javalin (so you can send data via a web request)
  * 2. Sends that dat to ActiveMQ as a message for everyone else to see.
+ * Takes data from the nurse (REST API) and "produces" a message to ActiveMQ
  */
 
 public class TriageService {
@@ -31,7 +32,7 @@ public class TriageService {
             boolean sent = publishToMQ(event);
 
             if (sent) {
-                ctx.status(201).result("Paitent " + event.getPaitentName() + " admitted and broadcasted!");
+                ctx.status(201).result("Paitent " + event.getPatientName() + " admitted and broadcasted!");
             } else {
                 ctx.status(500).result("System error: ActiveMQ is likely offline.");
             }
@@ -42,7 +43,9 @@ public class TriageService {
     private static boolean publishToMQ(TriageEvent event) {
         try {
             // 1. Create a connection to the ActiveMQ broker
-            ConnectionFactory factory = new ActiveMQConnectionFactory(HospitalMQ.BROKER_URL);
+            ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(HospitalMQ.BROKER_URL);
+            factory.setTrustAllPackages(true);
+
             Connection connection = factory.createConnection();
             connection.start();
 
@@ -59,13 +62,14 @@ public class TriageService {
             // 5. Send it
             producer.send(message);
 
-            System.out.println("Broadcasted: " + event.getPaitentName() + " (Level: " + event.getTriageLevel() + ")");
+            System.out.println("Broadcasted: " + event.getPatientName() + " (Level: " + event.getTriageLevel() + ")");
 
             // 6. Clean up
             connection.close();
             return true;
         } catch (Exception e) {
-            System.err.println("Failed to send message: " + e.getMessage());
+//            System.err.println("Failed to send message: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
 

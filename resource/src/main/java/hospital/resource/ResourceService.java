@@ -9,6 +9,9 @@ import javax.jms.*;
 /*
  * This service deos not need a web server (like Javalin) necessarily,
  * but it must stay running so it can listen for messages from ActiveMQ
+ * Needs to listen to hospital.triage topic. When I run the curl command, this service should automatically react
+ * Needs a MessageListener. Unlike TriageService this service stays open forever, waiting for data
+ * "Consumes" the message. It listens for new data and acts on it
  */
 public class ResourceService {
     public static void main(String[] args) {
@@ -51,7 +54,7 @@ public class ResourceService {
 
     private static void processPatient(TriageEvent event) {
         System.out.println("\n New Patient Alert");
-        System.out.println("Patient: " + event.getPaitentName());
+        System.out.println("Patient: " + event.getPatientName());
         System.out.println("Priority: " + event.getTriageLevel());
 
         // Simple logic to "assign" resources based on priority

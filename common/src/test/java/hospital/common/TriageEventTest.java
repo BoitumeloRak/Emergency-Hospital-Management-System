@@ -13,7 +13,7 @@ public class TriageEventTest {
     void testEventCreation() {
         TriageEvent event = new TriageEvent("Boitumelo Rakgole", "RED");
 
-        assertEquals("Boitumelo Rakgole", event.getPaitentName());
+        assertEquals("Boitumelo Rakgole", event.getPatientName());
         assertEquals("RED", event.getTriageLevel());
         assertTrue(event.getTimestamp() > 0, "Timestamp should be initialized");
     }
