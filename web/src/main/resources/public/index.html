@@ -5,11 +5,20 @@
     <title>Hospital Live Dashboard</title>
 </head>
 <body>
-    <h1>Live Triage Head</h1>
+    <h1>Live Triage</h1>
     <ul id="patient-list"></ul>
 
     <script>
         const ws = new WebSocket("ws://localhost:7002/live-triage");
+        const list = document.getElementById("patient-list");
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            const li = document.createElement("li");
+            li.textContent = `Patient: ${data.name} - Priority: ${data.level}`;
+            li.style.color = data.level === "RED" ? "red" : "black";
+            list.appendChild(li);
+        };
     </script>
 
 </body>
