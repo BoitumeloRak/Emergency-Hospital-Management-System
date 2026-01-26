@@ -16,17 +16,6 @@ public class WebService {
     private static final Set<WsContext> client = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     public static void main(String[] args) throws JMSException {
-        // 1. Start Javalin for the Web Dashboard on Port 7002
-        Javalin app = Javalin.create(config -> {
-            config.staticFiles.add("/public"); // put html here
-        }).start(7002);
-
-        // 2. Setup WebSocket endpoint
-        app.ws("/live-triage", ws -> {
-            ws.onConnect(ctx -> client.add(ctx));
-            ws.onClose(ctx -> client.remove(ctx));
-        });
-
         // 3. Connect to ActiveMQ to CONSUME events
         ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(HospitalMQ.BROKER_URL);
         factory.setTrustAllPackages(true);
@@ -38,16 +27,40 @@ public class WebService {
         Topic topic = session.createTopic(HospitalMQ.TRIAGE_TOPIC);
         MessageConsumer consumer = session.createConsumer(topic);
 
-        // 4. WHen a message arrives, send it to the Browsers
+        // 1. Start Javalin for the Web Dashboard on Port 7002
+        Javalin app = Javalin.create(config -> {
+            config.staticFiles.add("/public"); // put html here
+        }).start(7002);
+
+        // Receive from web (the form) -> send to MQ
+        app.post("/admit-patient", ctx -> {
+            TriageEvent event = ctx.bodyAsClass(TriageEvent.class);
+
+            MessageProducer producer = session.createProducer(topic);
+            ObjectMessage msg = session.createObjectMessage(event);
+            producer.send(msg);
+            producer.close();
+
+            ctx.status(201).result("Patient queued via Web UI");
+        });
+
+        // 2. Setup WebSocket  (for live updates)
+        app.ws("/live-triage", ws -> {
+            ws.onConnect(ctx -> client.add(ctx));
+            ws.onClose(ctx -> client.remove(ctx));
+        });
+
+        // 4. When a message arrives, send it to the Browsers
+//        MessageConsumer consumer = session.createConsumer(topic);
         consumer.setMessageListener(message -> {
             try {
                 if (message instanceof ObjectMessage) {
                     TriageEvent event = (TriageEvent) ((ObjectMessage) message).getObject();
-                    String jsonUpdate = String.format("{\"name\": \"%s\", \"level\": \"%s\"}",
+                    String json = String.format("{\"name\": \"%s\", \"level\": \"%s\"}",
                             event.getPatientName(), event.getTriageLevel());
 
                     // Push to all connected browsers
-                    client.forEach(client -> client.send(jsonUpdate));
+                    client.forEach(client -> client.send(json));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
