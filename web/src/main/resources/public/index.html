@@ -15,49 +15,49 @@
     </style>
 </head>
 <body>
-    <h1>Emergency Hospital Management System </h1>
-    <div class="container">
-        <div class="panel form-panel">
-            <h2>Admit New Patient</h2>
-            <input type="text" id="pName" placeholder="Patient Name" style="width:90%; padding:8px; margin-bottom:10px;"><br>
-            <select id="pLevel" style="width:95%; padding:8px; margin-bottom:10px;">
-                <option value="GREEN">GREEN (Minor)</option>
-                <option value="YELLOW">YELLOW (Urgent)</option>
-                <option value="RED">RED (Emergency)</option>
-            </select><br>
-            <button onclick="admitPatient()">Send to Triage</button>
-        </div>
-
-        <div class="panel feed-panel">
-            <h2>Live Triage Feed</h2>
-            <div id="feed"></div>
-        </div>
+<h1>Hospital Command Center</h1>
+<div class="container">
+    <div class="panel form-panel">
+        <h2>Admit New Patient</h2>
+        <input type="text" id="pName" placeholder="Patient Name" style="width:90%; padding:8px; margin-bottom:10px;"><br>
+        <select id="pLevel" style="width:95%; padding:8px; margin-bottom:10px;">
+            <option value="GREEN">GREEN (Minor)</option>
+            <option value="YELLOW">YELLOW (Urgent)</option>
+            <option value="RED">RED (Emergency)</option>
+        </select><br>
+        <button onclick="admitPatient()">Send to Triage</button>
     </div>
-    <script>
-        // 1. SEND DATA (Replaces Curl)
-        async function admitPatient() {
-            const name = document.getElementById('pName').value;
-            const level = document.getElementById('pLevel').value;
 
-            await fetch('/admit-patient', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ patientName: name, triageLevel: level })
-            });
-            document.getElementById('pName').value = ''; // clear input
-        }
+    <div class="panel feed-panel">
+        <h2>Live Triage Feed</h2>
+        <div id="feed"></div>
+    </div>
+</div>
 
-        // 2. RECEIVE DATA (WebSocket)
-        const ws = new WebSocket("ws://" + location.host + "/live-triage");
-        ws.onmessage = (msg) => {
-            const data = JSON.parse(msg.data);
-            const feed = document.getElementById('feed');
-            const div = document.createElement('div');
-            div.className = `patient-card ${data.level}`;
-            div.innerHTML = `<strong>${data.name}</strong> - Priority: ${data.level}`;
-            feed.prepend(div); // Newest at top
-        };
-    </script>
+<script>
+    // 1. SEND DATA (Replaces Curl)
+    async function admitPatient() {
+        const name = document.getElementById('pName').value;
+        const level = document.getElementById('pLevel').value;
 
+        await fetch('/admit-patient', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ patientName: name, triageLevel: level })
+        });
+        document.getElementById('pName').value = ''; // clear input
+    }
+
+    // 2. RECEIVE DATA (WebSocket)
+    const ws = new WebSocket("ws://" + location.host + "/live-triage");
+    ws.onmessage = (msg) => {
+        const data = JSON.parse(msg.data);
+        const feed = document.getElementById('feed');
+        const div = document.createElement('div');
+        div.className = `patient-card ${data.level}`;
+        div.innerHTML = `<strong>${data.name}</strong> - Priority: ${data.level}`;
+        feed.prepend(div); // Newest at top
+    };
+</script>
 </body>
 </html>

@@ -5,6 +5,9 @@ import hospital.common.TriageEvent;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;
+import javax.jms.Connection;
+
+import java.sql.*;
 
 /*
  * This service deos not need a web server (like Javalin) necessarily,
@@ -14,6 +17,7 @@ import javax.jms.*;
  * "Consumes" the message. It listens for new data and acts on it
  */
 public class ResourceService {
+    private static final PatientDAO patientDAO = new PatientDAO(); // initialize once
     public static void main(String[] args) {
         try {
             // 1. Connection to the ActiveMQ
@@ -41,8 +45,11 @@ public class ResourceService {
                 if (message instanceof ObjectMessage) {
                     try {
                         TriageEvent event = (TriageEvent) ((ObjectMessage) message).getObject();
-                        processPatient(event);
-                    } catch (JMSException e) {
+                        // Save to database (the real system)
+                        patientDAO.savePatient(event);
+                        System.out.println("Assigning room for: " + event.getPatientName());
+                        //processPatient(event);
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -65,4 +72,6 @@ public class ResourceService {
         }
 
     }
+
+
 }
