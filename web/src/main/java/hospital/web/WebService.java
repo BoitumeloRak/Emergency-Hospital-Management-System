@@ -1,6 +1,7 @@
 package hospital.web;
 
 import hospital.common.HospitalMQ;
+import hospital.common.PatientDAO;
 import hospital.common.TriageEvent;
 import io.javalin.Javalin;
 import io.javalin.websocket.WsContext;
@@ -13,8 +14,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class WebService {
+    private static final PatientDAO patientDAO = new PatientDAO();
+
     // Keep track of all open browser windows
     private static final Set<WsContext> client = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+
 
     public static void main(String[] args) throws JMSException {
         // 3. Connect to ActiveMQ to CONSUME events
@@ -83,6 +88,11 @@ public class WebService {
         app.ws("/live-triage", ws -> {
             ws.onConnect(ctx -> client.add(ctx));
             ws.onClose(ctx -> client.remove(ctx));
+        });
+
+        app.get("/api/history", ctx -> {
+           // Object patientDAO;
+            ctx.json(patientDAO.getHistory());
         });
 
         // 4. When a message arrives, send it to the Browsers

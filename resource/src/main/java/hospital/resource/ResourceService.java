@@ -1,13 +1,12 @@
 package hospital.resource;
 
 import hospital.common.HospitalMQ;
+import hospital.common.PatientDAO;
 import hospital.common.TriageEvent;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;
 import javax.jms.Connection;
-
-import java.sql.*;
 
 /*
  * This service deos not need a web server (like Javalin) necessarily,
@@ -46,8 +45,13 @@ public class ResourceService {
                     try {
                         TriageEvent event = (TriageEvent) ((ObjectMessage) message).getObject();
                         // Save to database (the real system)
-                        patientDAO.savePatient(event);
-                        System.out.println("Assigning room for: " + event.getPatientName());
+
+
+                        String zone = event.getTriageLevel().equals("RED") ? "ER-Zone-A" : "General-B";
+                        String bedNumber = zone + "-" + (int)(Math.random() * 100);
+
+                        patientDAO.savePatient(event, bedNumber);
+                        System.out.println("Persistent Record: : " + event.getPatientName() + "assigned to " + bedNumber);
                         //processPatient(event);
                     } catch (Exception e) {
                         e.printStackTrace();
