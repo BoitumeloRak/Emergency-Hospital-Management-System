@@ -1,2 +1,3 @@
+hospital/common/PatientDAO.class
 hospital/common/TriageEvent.class
 hospital/common/HospitalMQ.class

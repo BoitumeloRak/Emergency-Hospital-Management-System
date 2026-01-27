@@ -15,6 +15,9 @@ public class TriageEventTest {
 
         assertEquals("Boitumelo Rakgole", event.getPatientName());
         assertEquals("RED", event.getTriageLevel());
-        assertTrue(event.getTimestamp() > 0, "Timestamp should be initialized");
+
+        assertNotNull(event.getTimestamp(), "Timestamp should not be null");
+        assertFalse(event.getTimestamp().isEmpty(), "Timestamp should not be empty");
+//        assertTrue(event.getTimestamp() > 0, "Timestamp should be initialized");
     }
 }

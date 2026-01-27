@@ -1,1 +1,4 @@
 hospital.db
+target/
+*.class
+.idea/
