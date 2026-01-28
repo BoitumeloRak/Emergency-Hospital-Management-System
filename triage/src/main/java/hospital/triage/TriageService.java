@@ -15,13 +15,22 @@ import javax.jms.*;
  * 1. Provides a REST API using Javalin (so you can send data via a web request)
  * 2. Sends that dat to ActiveMQ as a message for everyone else to see.
  * Takes data from the nurse (REST API) and "produces" a message to ActiveMQ
+ *
+ * only job is to a POST OFFICE
+ * It takes the "Envelope" (the patient data) and drops it in the "Mailbox" (ActiveMQ).
  */
 
 public class TriageService {
     public static void main(String[] args) {
 
         // Start Javalin Web Server
-        Javalin app = Javalin.create().start(7001);
+        Javalin app = Javalin.create(config -> {
+            config.plugins.enableCors(cors -> {
+                cors.add(it -> {
+                    it.anyHost();
+                });
+            });
+        }).start(7001);
 
         // This is the endpoint the nurse uses to admit a patient
         app.post("/admit", ctx -> {
@@ -32,7 +41,7 @@ public class TriageService {
             boolean sent = publishToMQ(event);
 
             if (sent) {
-                ctx.status(201).result("Paitent " + event.getPatientName() + " admitted and broadcasted!");
+                ctx.status(201).result("Patient " + event.getPatientName() + " admitted and broadcasted!");
             } else {
                 ctx.status(500).result("System error: ActiveMQ is likely offline.");
             }
