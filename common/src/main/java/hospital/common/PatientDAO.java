@@ -2,6 +2,7 @@ package hospital.common;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -72,6 +73,7 @@ public class PatientDAO {
             while (rs.next()) {
                 // We use Map.of to create a clean "JSON-ready" object for each row
                 history.add(Map.of(
+                        "id", String.valueOf(rs.getInt("id")),
                         "name", rs.getString("name"),
                         "level", rs.getString("level"),
                         "category", rs.getString("category") != null ? rs.getString("category") : "General",
@@ -102,6 +104,38 @@ public class PatientDAO {
             e.printStackTrace();
         }
         return 0; // Default to 0 if error
+    }
+
+    public void updateStatus(int id, String newStatus, String destination) {
+        String sql = "UPDATE patients SET status = ?, destination = ? WHERE id = ?";
+        try (Connection conn = DriverManager.getConnection(URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, newStatus);
+            pstmt.setString(2, destination);
+            pstmt.setString(3, String.valueOf(id));
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Map<String, Integer> getAllWardCounts() {
+        Map<String, Integer> counts = new HashMap<>();
+        // only count patients who are admitted
+        String sql = "SELECT ward, COUNT(*) as total FROM patients WHERE status = 'ADMITTED' GROUP BY ward";
+
+        try (Connection conn = DriverManager.getConnection(URL);
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                counts.put(rs.getString("ward"), rs.getInt("total"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return counts;
     }
 }
 

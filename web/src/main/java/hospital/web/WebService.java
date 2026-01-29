@@ -35,7 +35,7 @@ public class WebService {
 
         // 1. Start Javalin for the Web Dashboard on Port 7002
         Javalin app = Javalin.create(config -> {
-            config.staticFiles.add("/public"); // put html here
+            config.staticFiles.add("/public"); // will tell Javalin where to look
         }).start(7002);
 
         // Professional Login Route
@@ -84,6 +84,24 @@ public class WebService {
 
         });
 
+        // discharge route
+        app.post("/api/patient/{id}/discharge", ctx -> {
+            int id = Integer.parseInt(ctx.pathParam("id"));
+            patientDAO.updateStatus(id, "DISCHARGED", "HOME");
+            ctx.status(200).result("Patient Discharge");
+        });
+
+        // transfer route
+        app.post("/api/patient/{id}/transfer", ctx -> {
+           int id = Integer.parseInt(ctx.pathParam("id"));
+           patientDAO.updateStatus(id, "DISCHARGED", "HOME");
+           ctx.status(200).result("Patient Discharged");
+        });
+
+        app.get("/api/stats", ctx -> {
+            ctx.json(patientDAO.getAllWardCounts());
+        });
+
         // 2. Setup WebSocket  (for live updates)
         app.ws("/live-triage", ws -> {
             ws.onConnect(ctx -> client.add(ctx));
@@ -101,8 +119,8 @@ public class WebService {
             try {
                 if (message instanceof ObjectMessage) {
                     TriageEvent event = (TriageEvent) ((ObjectMessage) message).getObject();
-                    String json = String.format("{\"name\": \"%s\", \"level\": \"%s\"}",
-                            event.getPatientName(), event.getTriageLevel(), event.getHandledBy());
+                    String json = String.format("{\"name\": \"%s\", \"level\": \"%s\", \"category\": \"%s\", \"handledBy\": \"%s\"}",
+                            event.getPatientName(), event.getTriageLevel(), event.getPatientCategory(), event.getHandledBy());
 
                     // Push to all connected browsers
                     client.forEach(client -> client.send(json));

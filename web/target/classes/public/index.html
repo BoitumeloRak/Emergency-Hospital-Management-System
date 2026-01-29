@@ -3,61 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <title>Hospital Control Center</title>
-    <style>
-        body { font-family: sans-serif; margin: 40px; background: #f4f7f6; }
-        .container { display: flex; gap: 20px; }
-        .panel { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .form-panel { flex: 1; }
-        .feed-panel { flex: 2; }
-        .patient-card { border-left: 5px solid #ccc; padding: 10px; margin: 10px 0; background: #fafafa; }
-        .RED { border-color: #e74c3c; } .YELLOW { border-color: #f1c40f; } .GREEN { border-color: #2ecc71; }
-        button { background: #2c3e50; color: white; border: none; padding: 10px 20px; cursor: pointer; }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<h1>Hospital Command Center</h1>
-<div class="container">
-    <div class="panel form-panel">
-        <h2>Admit New Patient</h2>
-        <input type="text" id="pName" placeholder="Patient Name" style="width:90%; padding:8px; margin-bottom:10px;"><br>
-        <select id="pLevel" style="width:95%; padding:8px; margin-bottom:10px;">
-            <option value="GREEN">GREEN (Minor)</option>
-            <option value="YELLOW">YELLOW (Urgent)</option>
-            <option value="RED">RED (Emergency)</option>
-        </select><br>
-        <button onclick="admitPatient()">Send to Triage</button>
+    <h1>Hospital Command Center</h1>
+    <div class="container">
+        <div class="panel form-panel">
+            <h2>Admit New Patient</h2>
+            <input type="text" id="pName" placeholder="Patient Name" class="input-field"><br>
+
+            <label>Priority:</label>
+            <select id="pLevel" class="input-field">
+                <option value="GREEN">GREEN (Minor)</option>
+                <option value="YELLOW">YELLOW (Urgent)</option>
+                <option value="RED">RED (Emergency)</option>
+            </select><br>
+
+
+            <label>Category:</label>
+            <select id="pCategory" class="input-field">
+                <option value="General">General</option>
+                <option value="Maternity">Maternity</option>
+                <option value="Psychiatric">Psychiatric</option>
+            </select><br>
+
+            <label>Gender:</label>
+            <select id="pGender" class="input-field">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select><br>
+
+            <input type="number" id="pAge" placeholder="Age" class="input-field"><br>
+
+            <button onclick="admitPatient()">Send to Triage</button>
+        </div>
+
+        <div class="panel feed-panel">
+            <h2>Live Triage Feed</h2>
+            <div id="feed"></div>
+
+            <hr>
+
+            <h2>Hospital History</h2>
+            <button onclick="loadHistory()">Refresh History</button>
+            <table id="historyTable" style="width:100%; margin-top:10px; border-collapse: collapse;">
+                <thead>
+                <tr style="background:#eee">
+                    <th>Name</th>
+                    <th>Ward</th>
+                    <th>Status</th>
+                    <th>Time</th>
+                </tr>
+                </thead>
+                <tbody id="historyBody"></tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="panel feed-panel">
-        <h2>Live Triage Feed</h2>
-        <div id="feed"></div>
-    </div>
-</div>
-
-<script>
-    // 1. SEND DATA (Replaces Curl)
-    async function admitPatient() {
-        const name = document.getElementById('pName').value;
-        const level = document.getElementById('pLevel').value;
-
-        await fetch('/admit-patient', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ patientName: name, triageLevel: level })
-        });
-        document.getElementById('pName').value = ''; // clear input
-    }
-
-    // 2. RECEIVE DATA (WebSocket)
-    const ws = new WebSocket("ws://" + location.host + "/live-triage");
-    ws.onmessage = (msg) => {
-        const data = JSON.parse(msg.data);
-        const feed = document.getElementById('feed');
-        const div = document.createElement('div');
-        div.className = `patient-card ${data.level}`;
-        div.innerHTML = `<strong>${data.name}</strong> - Priority: ${data.level}`;
-        feed.prepend(div); // Newest at top
-    };
-</script>
+    <script src="js/dashboard.js"></script>
 </body>
 </html>
