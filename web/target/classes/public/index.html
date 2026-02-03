@@ -7,6 +7,39 @@
 </head>
 <body>
     <h1>Hospital Command Center</h1>
+
+    <div class="stats-bar">
+        <div class="stat-card">
+            <h3>ICU</h3>
+            <p id="stat-ICU">0 / 5</p>
+            <div class="progress"><div id="bar-ICU" class="progress-fill"></div></div>
+        </div>
+        <div class="stat-card">
+            <h3>Maternity</h3>
+            <p id="stat-Maternity">0 / 10</p>
+            <div class="progress"><div id="bar-Maternity" class="progress-fill"></div></div>
+        </div>
+        <div class="stat-card">
+            <h3>Psychiatric</h3>
+            <p id="stat-Psychiatric">0 / 8</p>
+            <div class="progress"><div id="bar-Psychiatric" class="progress-fill"></div></div>
+        </div>
+        <div class="stat-card">
+            <h3>General</h3>
+            <p id="stat-General">0 / 20</p>
+            <div class="progress"><div id="bar-General" class="progress-fill"></div></div>
+        </div>
+        <div class="stats-bar">
+            <div class="stat-card">
+                <h3>Pediatric</h3>
+                <p id="stat-Pediatric">0 / 30</p>
+                <div class="progress"><div id="bar-Pediatric" class="progress-fill"></div></div>
+            </div>
+        </div>
+
+    </div>
+
+
     <div class="container">
         <div class="panel form-panel">
             <h2>Admit New Patient</h2>
@@ -25,6 +58,8 @@
                 <option value="General">General</option>
                 <option value="Maternity">Maternity</option>
                 <option value="Psychiatric">Psychiatric</option>
+                <option value="ICU">ICU (Critical Care)</option>
+                <option value="Pediatric">Pediatric</option>
             </select><br>
 
             <label>Gender:</label>
@@ -53,6 +88,7 @@
                     <th>Ward</th>
                     <th>Status</th>
                     <th>Time</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody id="historyBody"></tbody>

@@ -58,19 +58,25 @@ public class WebService {
             TriageEvent event = ctx.bodyAsClass(TriageEvent.class);
 
             // Security layer: Log the actual network source
-            String ipAddress = ctx.ip();
-            String userAgent = ctx.header("User-Agent");
+            //String ipAddress = ctx.ip();
+            //String userAgent = ctx.header("User-Agent");
 
             // Attach this to the event (requires adding fields to TriageEvent.java)
             // event.setSourceIp(ipAddress);
 
-            System.out.println("Alert: Patient admitted from IP: " + ipAddress + " by " + event.getHandledBy());
+            //System.out.println("Alert: Patient admitted from IP: " + ipAddress + " by " + event.getHandledBy());
 
+            //String staff = ctx.sessionAttribute("currentUser");
             String staff = ctx.sessionAttribute("currentUser");
+
             if (staff == null) {
-                ctx.status(403).result("You must be logged un to admit patients");
-                return;
+                staff = "Default admin";
             }
+            event.setHandledBy(staff);
+
+                //ctx.status(403).result("You must be logged un to admit patients");
+                //return;
+            //}
            // TriageEvent event = ctx.bodyAsClass(TriageEvent.class);
             //event.setHandleBy(staff); // Log WHO did the work
 
@@ -87,15 +93,16 @@ public class WebService {
         // discharge route
         app.post("/api/patient/{id}/discharge", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
-            patientDAO.updateStatus(id, "DISCHARGED", "HOME");
+            patientDAO.updateStatus(id, "DISCHARGED", "NONE");
             ctx.status(200).result("Patient Discharge");
         });
 
         // transfer route
         app.post("/api/patient/{id}/transfer", ctx -> {
            int id = Integer.parseInt(ctx.pathParam("id"));
-           patientDAO.updateStatus(id, "DISCHARGED", "HOME");
-           ctx.status(200).result("Patient Discharged");
+           String destination = ctx.queryParam("to");
+           patientDAO.updateStatus(id, "TRANSFERRED", destination);
+           ctx.status(200).result("Patient transferred");
         });
 
         app.get("/api/stats", ctx -> {

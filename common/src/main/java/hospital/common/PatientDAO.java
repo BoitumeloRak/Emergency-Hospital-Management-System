@@ -71,16 +71,15 @@ public class PatientDAO {
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
-                // We use Map.of to create a clean "JSON-ready" object for each row
-                history.add(Map.of(
-                        "id", String.valueOf(rs.getInt("id")),
-                        "name", rs.getString("name"),
-                        "level", rs.getString("level"),
-                        "category", rs.getString("category") != null ? rs.getString("category") : "General",
-                        "age", String.valueOf(rs.getInt("age")),
-                        "ward", rs.getString("ward") != null ? rs.getString("ward") : "Unassigned",
-                        "time", rs.getString("timestamp")
-                ));
+                Map<String, String> entry = new HashMap<>(); // Using HashMap because Map.of is immutable
+                entry.put("id", String.valueOf(rs.getInt("id")));
+                entry.put("name", rs.getString("name"));
+                entry.put("ward", rs.getString("ward") != null ? rs.getString("ward") : "Unassigned");
+                entry.put("status", rs.getString("status")); // ADD THIS
+                entry.put("destination", rs.getString("destination")); // ADD THIS
+                entry.put("time", rs.getString("timestamp"));
+
+                history.add(entry);
             }
         } catch (SQLException e) {
             e.printStackTrace();

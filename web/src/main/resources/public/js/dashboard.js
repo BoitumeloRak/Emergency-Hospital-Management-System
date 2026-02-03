@@ -32,22 +32,32 @@ async function loadHistory() {
         const patients = await response.json();
         const body = document.getElementById('historyBody');
 
-        body.innerHTML = patients.map(p => `
-            <tr>
-                <td>${p.name}</td>
-                <td><strong>${p.ward}</strong></td>
-                <td><span class="status-tag status-${p.status.toLowerCase()}">${p.status}</span></td>
-                <td>
-                    ${p.status === 'ADMITTED' ? `
-                        <button class="btn-discharge" onclick="dischargePatient(${p.id})">Discharge</button>
-                        <button class="btn-transfer" onclick="transferPatient(${p.id})">Transfer</button>
-                        ` : `<small>Done: ${p.destination || ''}</small>`}
+        body.innerHTML = patients.map(p => {
+            const currentStatus = p.status || 'ADMITTED';
+            const currentId = p.id;
+            // get time form the JSON or show "N/A" if empty
+            const timeAdmitted = p.time || 'Pending...'
+
+            return `
+             <tr>
+                  <td>${p.name}</td>
+                  <td><strong>${p.ward}</strong></td>
+                  <td><span class="status-tag status-${currentStatus.toLowerCase()}">${currentStatus}</span></td>
+                  <td>${p.time || 'N/A'}</td> <td>
+                      ${currentStatus.toUpperCase() === 'ADMITTED' ? `
+                         <button class="btn-discharge" onclick="dischargePatient(${currentId})">Discharge</button>
+                         <button class="btn-transfer" onclick="transferPatient(${currentId})">Transfer</button>
+                         ` : `<small>Done: ${p.destination || ''}</small>`}
                 </td>
-            </tr>
-        `).join('');
+             </tr>
+            `;
+        }).join('');
     } catch (error) {
-        console.error("Error loading history:", error);
+        console.error("Error loading history:", error)
     }
+
+
+
 }
 
 // Action: Discharge
@@ -68,36 +78,44 @@ async function transferPatient(id) {
 }
 
 async function updateStats() {
-    const response = await fetch('/api/stats');
-    const stats = await response.json();
+    try {
+        const response = await fetch('/api/stats');
+        const stats = await response.json();
 
-    const wards = [
-        { id: 'ICU', limit: 5, name: 'ICU' },
-        { id: 'Maternity', limit: 10, name: 'Maternity-Ward' },
-        { id: 'Psychiatric', limit: 8, name: 'Psychiatric-Ward' }
-    ];
+        const wards = [
+            { id: 'ICU', limit: 5 },
+            { id: 'Maternity', limit: 10 },
+            { id: 'Psychiatric', limit: 8 },
+            { id: 'General', limit: 20 },
+            { id: 'Pediatric', limit: 30 }
+        ];
 
-    wards.forEach(ward => {
-        // Find the count in the data (handle cases where ward name varies)
-        const count = stats[ward.name] || 0;
-        const percentage = (count / ward.limit) * 100;
+        wards.forEach(ward => {
+            const matchingKey = Object.keys(stats).find(key => key.includes(ward.id));
+            const count = matchingKey ? stats[matchingKey] : 0;
+            const percentage = (count / ward.limit) * 100;
 
-        document.getElementById(`stat-${ward.id}`).innerText = `${count} / ${ward.limit}`;
-        document.getElementById(`bar-${ward.id}`).style.width = `${Math.min(percentage, 100)}%`;
+            // Notice the spelling: getElementById
+            const textElem = document.getElementById(`stat-${ward.id}`);
+            const barElem = document.getElementById(`bar-${ward.id}`);
 
-        // Change color to red if ward is full
-        if (percentage >= 100) {
-            document.getElementById(`bar-${ward.id}`).style.background = "#e74c3c";
-        } else {
-            document.getElementById(`bar-${ward.id}`).style.background = "#2ecc71";
-        }
-    });
+            if (textElem && barElem) {
+                textElem.innerText = `${count} / ${ward.limit}`;
+                barElem.style.width = `${Math.min(percentage, 100)}%`;
+            } else {
+                console.warn(`Missing HTML elements for ward: ${ward.id}`);
+            }
+        });
+    } catch (error) {
+        console.error("Stats update failed:", error);
+    }
 }
 
 // Call this inside window.onload and after every Discharge/Admit
 window.onload = () => {
     loadHistory();
     updateStats();
+    setInterval(updateStats, 5000)
 };
 
 // 3. WebSocket Live Updates
@@ -119,4 +137,4 @@ ws.onmessage = (msg) => {
 };
 
 // Auto-load history on page load
-window.onload = loadHistory;
+//window.onload = loadHistory;

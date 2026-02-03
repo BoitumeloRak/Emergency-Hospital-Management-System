@@ -19,10 +19,32 @@ td { padding: 10px; border-bottom: 1px solid #ddd; }
 
 .btn-discharge {
     background: #c0392b; /* Red */
+    color: white;
+    border: none;
     padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
     font-size: 12px;
     width: auto;
     margin-right: 5px;
+}
+
+.btn-discharge, .btn-transfer {
+    margin: 2px;
+}
+
+/* Style for the Transfer button */
+.btn-transfer {
+    background-color: #f39c12; /* Orange */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-discharge:hover, .btn-transfer:hover {
+    opacity: 0.8;
 }
 
 .btn-transfer {
@@ -39,6 +61,12 @@ td { padding: 10px; border-bottom: 1px solid #ddd; }
     font-size: 11px;
 }
 
+#historyTable th, #historyTable td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
 .status-admitted { background: #d4edda; color: #155724; }
 .status-transferred { background: #fff3cd; color: #856404; }
 
@@ -49,3 +77,8 @@ td { padding: 10px; border-bottom: 1px solid #ddd; }
 
 .progress { background: #444; height: 8px; border-radius: 4px; overflow: hidden; }
 .progress-fill { background: #2ecc71; height: 100%; width: 0%; transition: width 0.5s ease-in-out; }
+
+.btn-discharge { background-color: #ff4444; color: white; border: none; padding: 5px; cursor: pointer; }
+.btn-transfer { background-color: #ffa500; color: white; border: none; padding: 5px; cursor: pointer; }
+button { padding: 10px 20px; cursor: pointer; }
+
