@@ -82,3 +82,57 @@ td { padding: 10px; border-bottom: 1px solid #ddd; }
 .btn-transfer { background-color: #ffa500; color: white; border: none; padding: 5px; cursor: pointer; }
 button { padding: 10px 20px; cursor: pointer; }
 
+/* Table Priority Glow */
+tr.priority-red { border-left: 5px solid #e74c3c; background-color: #fdf2f2; }
+tr.priority-yellow { border-left: 5px solid #f1c40f; background-color: #fffdf2; }
+tr.priority-green { border-left: 5px solid #2ecc71; background-color: #f2fdf5; }
+
+/* Status Tags */
+.status-tag {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.status-admitted { background: #d1ecf1; color: #0c5460; }
+.status-discharged { background: #d4edda; color: #155724; }
+.status-transferred { background: #fff3cd; color: #856404; }
+
+/* Table Spacing */
+#historyTable td {
+    padding: 12px 8px;
+    vertical-align: middle;
+    border-bottom: 1px solid #eee;
+}
+
+.search-container {
+    margin-bottom: 15px;
+}
+
+#historySearch {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    outline: none;
+}
+
+#historySearch:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+}
+
+/* Ensure the table doesn't shift when rows are hidden */
+#historyTable {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+/* Table hover effect */
+#historyTable tr:hover {
+    filter: brightness(0.98);
+    transition: 0.2s;
+}

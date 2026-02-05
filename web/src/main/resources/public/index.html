@@ -79,6 +79,10 @@
 
             <hr>
 
+            <div class="search-container">
+                <input type="text" id="historySearch" placeholder="Search patients by name..." onkeyup="filterHistory()">
+            </div>
+
             <h2>Hospital History</h2>
             <button onclick="loadHistory()">Refresh History</button>
             <table id="historyTable" style="width:100%; margin-top:10px; border-collapse: collapse;">

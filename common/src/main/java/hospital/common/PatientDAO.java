@@ -74,6 +74,7 @@ public class PatientDAO {
                 Map<String, String> entry = new HashMap<>(); // Using HashMap because Map.of is immutable
                 entry.put("id", String.valueOf(rs.getInt("id")));
                 entry.put("name", rs.getString("name"));
+                entry.put("level", rs.getString("level"));
                 entry.put("ward", rs.getString("ward") != null ? rs.getString("ward") : "Unassigned");
                 entry.put("status", rs.getString("status")); // ADD THIS
                 entry.put("destination", rs.getString("destination")); // ADD THIS
@@ -111,7 +112,8 @@ public class PatientDAO {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, newStatus);
             pstmt.setString(2, destination);
-            pstmt.setString(3, String.valueOf(id));
+
+            pstmt.setInt(3, id);
             pstmt.executeUpdate();
 
         } catch (SQLException e) {
@@ -136,6 +138,20 @@ public class PatientDAO {
         }
         return counts;
     }
+
+    public void clearAllData() {
+        try (Connection conn = DriverManager.getConnection(URL);
+             Statement stmt = conn.createStatement()) {
+            stmt.execute("DELETE FROM patients");
+            // Also reset the auto-increment counter
+            stmt.execute("DELETE FROM sqlite_sequence WHERE name='patients'");
+            System.out.println("Database cleared for new test run.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 }
 
 /*

@@ -93,7 +93,10 @@ public class WebService {
         // discharge route
         app.post("/api/patient/{id}/discharge", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
-            patientDAO.updateStatus(id, "DISCHARGED", "NONE");
+            String reason = ctx.queryParam("reason");
+            if (reason == null) reason = "Recovered"; // default reason
+
+            patientDAO.updateStatus(id, "DISCHARGED", reason);
             ctx.status(200).result("Patient Discharge");
         });
 
@@ -118,6 +121,11 @@ public class WebService {
         app.get("/api/history", ctx -> {
            // Object patientDAO;
             ctx.json(patientDAO.getHistory());
+        });
+
+        app.delete("/api/debug/reset", ctx -> {
+            patientDAO.clearAllData();
+            ctx.status(204);
         });
 
         // 4. When a message arrives, send it to the Browsers

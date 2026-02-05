@@ -1,13 +1,22 @@
 // 1. Admit Patient Logic
 async function admitPatient() {
+    const nameField = document.getElementById('pName');
+    const ageField = document.getElementById('pAge');
+
     const data = {
-        patientName: document.getElementById('pName').value,
+        patientName: nameField.value,
         triageLevel: document.getElementById('pLevel').value,
         patientCategory: document.getElementById('pCategory').value,
         gender: document.getElementById('pGender').value,
-        age: parseInt(document.getElementById('pAge').value),
+        age: parseInt(ageField.value),
         handledBy: "Admin"
     };
+
+    // simple validation check before sending
+    if (!data.patientName || isNaN(data.age)) {
+        alert("Please enter both a name and a valid age.");
+        return;
+    }
 
     try {
         const response = await fetch('/admit-patient', {
@@ -17,8 +26,20 @@ async function admitPatient() {
         });
 
         if(response.ok) {
-            document.getElementById('pName').value = '';
+            // clear all inputs for the next patient
+            nameField.value = '';
+            ageField.value = '';
+
+            // reset dropdowns to their first option
+            document.getElementById('pLevel').selectedIndex = 0;
+            document.getElementById('pCategory').selectedIndex = 0;
+            document.getElementById('pGender').value = 0;
+
             loadHistory(); // Refresh table immediately
+            updateStats();
+            console.log("Patient admitted and dashboard synced.")
+        } else {
+            alert("Admission failed. Server returned: " + response.statusText;)
         }
     } catch (error) {
         console.error("Failed to admit patient:", error);
@@ -38,16 +59,22 @@ async function loadHistory() {
             // get time form the JSON or show "N/A" if empty
             const timeAdmitted = p.time || 'Pending...'
 
+
+            // for row color based on triage level
+            const priorityClass = p.level ? `priority-${p.level.toLowerCase()}` : '';
+
+
             return `
-             <tr>
+             <tr class="${priorityClass}">
                   <td>${p.name}</td>
                   <td><strong>${p.ward}</strong></td>
                   <td><span class="status-tag status-${currentStatus.toLowerCase()}">${currentStatus}</span></td>
-                  <td>${p.time || 'N/A'}</td> <td>
+                  <td>${p.time || 'N/A'}</td>
+                  <td>
                       ${currentStatus.toUpperCase() === 'ADMITTED' ? `
                          <button class="btn-discharge" onclick="dischargePatient(${currentId})">Discharge</button>
                          <button class="btn-transfer" onclick="transferPatient(${currentId})">Transfer</button>
-                         ` : `<small>Done: ${p.destination || ''}</small>`}
+                         ` : `<small>Done: ${p.destination || 'N/A'}</small>`}
                 </td>
              </tr>
             `;
@@ -62,9 +89,14 @@ async function loadHistory() {
 
 // Action: Discharge
 async function dischargePatient(id) {
-    if (confirm("Are you sure you want to discharge this patient?")) {
-        await fetch(`/api/patient/${id}/discharge`, { method: 'POST' });
+    const reason = prompt("Enter discharge reason (e.g., Recovered, Home Care, Deceased): ")
+
+    if (reason) {
+        await fetch(`/api/patient/${id}/discharge?reason=${encodeURIComponent(reason)}`, {
+             method: 'POST'
+        });
         loadHistory(); // Refresh table
+        updateStats();
     }
 }
 
@@ -74,6 +106,7 @@ async function transferPatient(id) {
     if (hospital) {
         await fetch(`/api/patient/${id}/transfer?to=${hospital}`, { method: 'POST' });
         loadHistory(); // Refresh table
+        updateStats();
     }
 }
 
@@ -118,6 +151,26 @@ window.onload = () => {
     setInterval(updateStats, 5000)
 };
 
+function filterHistory() {
+    const input = document.getElementById('historySearch');
+    const filter = input.value.toLowerCase();
+    const table = document.querySelector("#historyTable"); // Make sure your table has this ID
+    const tr = table.getElementsByTagName('tr');
+
+    // Loop through all rows (skipping the header at index 0)
+    for (let i = 1; i < tr.length; i++) {
+        const nameColumn = tr[i].getElementsByTagName('td')[0]; // Name is the first column
+        if (nameColumn) {
+            const txtValue = nameColumn.textContent || nameColumn.innerText;
+            if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }
+    }
+}
+
 // 3. WebSocket Live Updates
 const protocol = location.protocol === "https:" ? "wss://" : "ws://";
 const ws = new WebSocket(protocol + location.host + "/live-triage");
@@ -125,15 +178,30 @@ const ws = new WebSocket(protocol + location.host + "/live-triage");
 ws.onmessage = (msg) => {
     const data = JSON.parse(msg.data);
     const feed = document.getElementById('feed');
+
     const div = document.createElement('div');
 
-    div.className = `patient-card ${data.level}`;
+    const priority = data.level ? data.level.toLowerCase() : 'green' ;
+
+    div.className = `patient-card ${priority} animate-pulse`;
     div.innerHTML = `
-        <strong>${data.name}</strong> admitted to <strong>${data.category}</strong><br>
-        <small>Priority: ${data.level} | Staff: ${data.handledBy || 'Unknown'}</small>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>${data.name}</strong>
+            <span class="status-tag priority-${priority}">${data.level}</span>
+        </div>
+        <div style="margin-top: 5px">
+            <small>Category: <strong>${data.category}</strong></small><br>
+            <small>Staff: ${data.handledBy || 'System'}</small>
+        </div>
     `;
 
     feed.prepend(div);
+
+    loadHistory();
+    updateStats();
+
+    // auto-remove alert form feed after 1 hour to prevent memory bloat
+    setTimeout(() => div.remove(), 3600000);
 };
 
 // Auto-load history on page load
