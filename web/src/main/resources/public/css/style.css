@@ -1,93 +1,154 @@
-body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background: #f4f7f6; color: #333; }
-.container { display: flex; gap: 20px; }
-.panel { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+/* 1. Global & Layout */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 40px;
+    background: #f4f7f6;
+    color: #333;
+}
+.container {
+    display: flex;
+    gap: 20px;
+}
+.panel {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
 .form-panel { flex: 1; }
 .feed-panel { flex: 2; }
 
-.input-field { width: 95%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid #ddd; border-radius: 4px; }
-button { background: #2c3e50; color: white; border: none; padding: 12px 20px; cursor: pointer; border-radius: 4px; width: 100%; transition: background 0.3s; }
+/* 2. Stats Bar (Fixed equal-width cards) */
+.stats-bar {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+    width: 100%;
+    align-items: stretch;
+}
+
+.stat-card {
+    background: #2c3e50;
+    color: white;
+    padding: 20px 10px;
+    border-radius: 8px;
+
+    flex: 1 1 0px; /* Forces identical width for all 5 cards */
+    width: 0;
+    min-width: 0;
+
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    box-shadow: 0 4px 6px rgba(0,0,0,0,1);
+}
+
+.stat-card h3 {
+    margin: 0;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #bdc3c7;
+}
+.stat-card p {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 12px 0;
+    color: #ffffff;
+}
+
+.progress {
+   background: rgba(0, 0, 0, 0.3);
+       height: 6px;
+       border-radius: 10px;
+       width: 100%;
+       margin-top: auto;
+}
+.progress-fill {
+    background: #2ecc71;
+    height: 100%;
+    width: 0%;
+    transition: width 0.5s ease-in-out;
+}
+
+/* 3. Forms & Shared Button Styles */
+.input-field {
+    width: 95%;
+    padding: 10px;
+    margin: 5px 0 15px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+button {
+    background: #2c3e50;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    border-radius: 4px;
+    width: 100%;
+    transition: background 0.3s;
+}
 button:hover { background: #34495e; }
 
-.patient-card { border-left: 5px solid #ccc; padding: 15px; margin: 10px 0; background: #fafafa; border-radius: 4px; }
+/* 4. Triage Feed & Action Buttons */
+.patient-card {
+    border-left: 5px solid #ccc;
+    padding: 15px;
+    margin: 10px 0;
+    background: #fafafa;
+    border-radius: 4px;
+}
 .RED { border-color: #e74c3c; background: #fdf2f2; }
 .YELLOW { border-color: #f1c40f; background: #fefdf0; }
 .GREEN { border-color: #2ecc71; background: #f2fbf5; }
 
-table { width: 100%; margin-top: 10px; border-collapse: collapse; }
-th { background: #eee; padding: 10px; text-align: left; }
-td { padding: 10px; border-bottom: 1px solid #ddd; }
-
-.btn-discharge {
-    background: #c0392b; /* Red */
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    width: auto;
-    margin-right: 5px;
-}
-
 .btn-discharge, .btn-transfer {
-    margin: 2px;
-}
-
-/* Style for the Transfer button */
-.btn-transfer {
-    background-color: #f39c12; /* Orange */
     color: white;
     border: none;
-    padding: 5px 10px;
+    padding: 6px 10px;
     border-radius: 4px;
     cursor: pointer;
-}
-
-.btn-discharge:hover, .btn-transfer:hover {
-    opacity: 0.8;
-}
-
-.btn-transfer {
-    background: #2980b9; /* Blue */
-    padding: 5px 10px;
     font-size: 12px;
-    width: auto;
-}
-
-.status-tag {
-    padding: 2px 6px;
-    border-radius: 4px;
+    width: auto; /* Overrides the 100% width of general buttons */
+    margin: 2px;
     font-weight: bold;
-    font-size: 11px;
 }
+.btn-discharge { background-color: #e74c3c; }
+.btn-transfer { background-color: #3498db; }
+.btn-discharge:hover, .btn-transfer:hover { opacity: 0.8; }
 
-#historyTable th, #historyTable td {
+/* 5. History Table */
+#historyTable {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin-top: 10px;
+}
+#historyTable th {
+    background: #eee;
     padding: 12px;
-    border-bottom: 1px solid #ddd;
     text-align: left;
 }
+#historyTable td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+#historyTable tr:hover {
+    filter: brightness(0.98);
+    transition: 0.2s;
+}
 
-.status-admitted { background: #d4edda; color: #155724; }
-.status-transferred { background: #fff3cd; color: #856404; }
-
-.stats-bar { display: flex; gap: 15px; margin-bottom: 20px; }
-.stat-card { background: #2c3e50; color: white; padding: 15px; border-radius: 8px; flex: 1; text-align: center; }
-.stat-card h3 { margin: 0; font-size: 14px; text-transform: uppercase; color: #bdc3c7; }
-.stat-card p { font-size: 24px; font-weight: bold; margin: 10px 0; }
-
-.progress { background: #444; height: 8px; border-radius: 4px; overflow: hidden; }
-.progress-fill { background: #2ecc71; height: 100%; width: 0%; transition: width 0.5s ease-in-out; }
-
-.btn-discharge { background-color: #ff4444; color: white; border: none; padding: 5px; cursor: pointer; }
-.btn-transfer { background-color: #ffa500; color: white; border: none; padding: 5px; cursor: pointer; }
-button { padding: 10px 20px; cursor: pointer; }
-
-/* Table Priority Glow */
+/* Table Priority Indicators (Glow Effect) */
 tr.priority-red { border-left: 5px solid #e74c3c; background-color: #fdf2f2; }
 tr.priority-yellow { border-left: 5px solid #f1c40f; background-color: #fffdf2; }
 tr.priority-green { border-left: 5px solid #2ecc71; background-color: #f2fdf5; }
 
-/* Status Tags */
+/* 6. Status Tags & Search UI */
 .status-tag {
     padding: 3px 8px;
     border-radius: 12px;
@@ -99,17 +160,7 @@ tr.priority-green { border-left: 5px solid #2ecc71; background-color: #f2fdf5; }
 .status-discharged { background: #d4edda; color: #155724; }
 .status-transferred { background: #fff3cd; color: #856404; }
 
-/* Table Spacing */
-#historyTable td {
-    padding: 12px 8px;
-    vertical-align: middle;
-    border-bottom: 1px solid #eee;
-}
-
-.search-container {
-    margin-bottom: 15px;
-}
-
+.search-container { margin-bottom: 15px; }
 #historySearch {
     width: 100%;
     padding: 10px;
@@ -117,22 +168,9 @@ tr.priority-green { border-left: 5px solid #2ecc71; background-color: #f2fdf5; }
     border-radius: 5px;
     font-size: 16px;
     outline: none;
+    box-sizing: border-box;
 }
-
 #historySearch:focus {
     border-color: #3498db;
     box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
-}
-
-/* Ensure the table doesn't shift when rows are hidden */
-#historyTable {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-}
-
-/* Table hover effect */
-#historyTable tr:hover {
-    filter: brightness(0.98);
-    transition: 0.2s;
 }

@@ -96,7 +96,8 @@ public class WebService {
             String reason = ctx.queryParam("reason");
             if (reason == null) reason = "Recovered"; // default reason
 
-            patientDAO.updateStatus(id, "DISCHARGED", reason);
+            patientDAO.updateStatus(id, "DISCHARGED", reason
+            );
             ctx.status(200).result("Patient Discharge");
         });
 
