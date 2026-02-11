@@ -29,14 +29,11 @@
             <p id="stat-General">0 / 20</p>
             <div class="progress"><div id="bar-General" class="progress-fill"></div></div>
         </div>
-        <div class="stats-bar">
-            <div class="stat-card">
-                <h3>Pediatric</h3>
-                <p id="stat-Pediatric">0 / 30</p>
-                <div class="progress"><div id="bar-Pediatric" class="progress-fill"></div></div>
-            </div>
+        <div class="stat-card">
+            <h3>Pediatric</h3>
+            <p id="stat-Pediatric">0 / 30</p>
+            <div class="progress"><div id="bar-Pediatric" class="progress-fill"></div></div>
         </div>
-
     </div>
 
 
@@ -78,6 +75,10 @@
             <div id="feed"></div>
 
             <hr>
+
+            <div class="search-container">
+                <input type="text" id="historySearch" placeholder="Search patients by name..." onkeyup="filterHistory()">
+            </div>
 
             <h2>Hospital History</h2>
             <button onclick="loadHistory()">Refresh History</button>

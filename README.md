@@ -57,8 +57,9 @@ Based on our current build, the following enhancements are planned to make the s
 4. **Reliability:** Adding **Audit Logging** to track every status change for clinical accountability.
 
 
-### 💻 Quick Start (Build Script)
-We use a automation script to build and launch all services simultaneously:
+### 💻 Manual Testing & Verification
+
+[//]: # (We use a automation script to build and launch all services simultaneously:)
 ```bash
 chmod +x run_hospital.sh
 ./run_hospital.sh
@@ -66,9 +67,6 @@ chmod +x run_hospital.sh
 To actually test this:
 1. Start ActiveMQ: Ensure the broker is running at tcp://localhost:61616
 2. Build project: mvn clean install
-2. Run Services: Launch ResourceService(Database & logic). Launch WebService.java (Dashboard & API)
-3. Access UI: Open http://localhost:7070 in your browser
-3. Send a Test: Use a tool like Postman or use this terminal command:
-curl -X POST http://localhost:7001/admit \
-     -H "Content-Type: application/json" \
-     -d '{"patientName": "Lerato Moloi", "triageLevel": "RED"}'
+3. Run Services: Launch ResourceService(Database & logic). Launch WebService.java (Dashboard & API)
+4. Access UI: Open http://localhost:7070 in your browser
+5. Send a Test: Use a tool like Postman or use this terminal command:
