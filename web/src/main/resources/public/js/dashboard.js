@@ -12,7 +12,7 @@ async function admitPatient() {
         handledBy: "Admin"
     };
 
-    // simple validation check before sending
+    // Simple validation check before sending
     if (!data.patientName || isNaN(data.age)) {
         alert("Please enter both a name and a valid age.");
         return;
@@ -25,24 +25,25 @@ async function admitPatient() {
             body: JSON.stringify(data)
         });
 
-        if(response.ok) {
-            // clear all inputs for the next patient
+        if (response.ok) {
+            // Clear all inputs for the next patient
             nameField.value = '';
             ageField.value = '';
 
-            // reset dropdowns to their first option
+            // Reset dropdowns to their first option
             document.getElementById('pLevel').selectedIndex = 0;
             document.getElementById('pCategory').selectedIndex = 0;
-            document.getElementById('pGender').value = 0;
+            document.getElementById('pGender').selectedIndex = 0;
 
             loadHistory(); // Refresh table immediately
             updateStats();
-            console.log("Patient admitted and dashboard synced.")
+            console.log("Patient admitted and dashboard synced.");
         } else {
-            alert("Admission failed. Server returned: " + response.statusText;)
+            alert("Admission failed. Server returned: " + response.statusText);
         }
     } catch (error) {
         console.error("Failed to admit patient:", error);
+        alert("Failed to connect to the server. Please try again.");
     }
 }
 
@@ -56,60 +57,65 @@ async function loadHistory() {
         body.innerHTML = patients.map(p => {
             const currentStatus = p.status || 'ADMITTED';
             const currentId = p.id;
-            // get time form the JSON or show "N/A" if empty
-            const timeAdmitted = p.time || 'Pending...'
-
-
-            // for row color based on triage level
+            const timeAdmitted = p.time || 'Pending...';
             const priorityClass = p.level ? `priority-${p.level.toLowerCase()}` : '';
 
-
             return `
-             <tr class="${priorityClass}">
-                  <td>${p.name}</td>
-                  <td><strong>${p.ward}</strong></td>
-                  <td><span class="status-tag status-${currentStatus.toLowerCase()}">${currentStatus}</span></td>
-                  <td>${p.time || 'N/A'}</td>
-                  <td>
-                      ${currentStatus.toUpperCase() === 'ADMITTED' ? `
-                         <button class="btn-discharge" onclick="dischargePatient(${currentId})">Discharge</button>
-                         <button class="btn-transfer" onclick="transferPatient(${currentId})">Transfer</button>
-                         ` : `<small>Done: ${p.destination || 'N/A'}</small>`}
-                </td>
-             </tr>
+                <tr class="${priorityClass}">
+                    <td>${p.name}</td>
+                    <td><strong>${p.ward}</strong></td>
+                    <td><span class="status-tag status-${currentStatus.toLowerCase()}">${currentStatus}</span></td>
+                    <td>${timeAdmitted}</td>
+                    <td>
+                        ${currentStatus.toUpperCase() === 'ADMITTED' ? `
+                            <button class="btn-discharge" onclick="dischargePatient(${currentId})">Discharge</button>
+                            <button class="btn-transfer" onclick="transferPatient(${currentId})">Transfer</button>
+                        ` : `<small>Done: ${p.destination || 'N/A'}</small>`}
+                    </td>
+                </tr>
             `;
         }).join('');
     } catch (error) {
-        console.error("Error loading history:", error)
+        console.error("Error loading history:", error);
     }
-
-
-
 }
 
-// Action: Discharge
+// 3. Discharge Patient
 async function dischargePatient(id) {
-    const reason = prompt("Enter discharge reason (e.g., Recovered, Home Care, Deceased): ")
+    const reason = prompt("Enter discharge reason (e.g., Recovered, Home Care, Deceased):");
 
     if (reason) {
-        await fetch(`/api/patient/${id}/discharge?reason=${encodeURIComponent(reason)}`, {
-             method: 'POST'
-        });
-        loadHistory(); // Refresh table
-        updateStats();
+        try {
+            await fetch(`/api/patient/${id}/discharge?reason=${encodeURIComponent(reason)}`, {
+                method: 'POST'
+            });
+            loadHistory();
+            updateStats();
+        } catch (error) {
+            console.error("Error discharging patient:", error);
+            alert("Failed to discharge patient. Please try again.");
+        }
     }
 }
 
-// Action: Transfer
+// 4. Transfer Patient
 async function transferPatient(id) {
     const hospital = prompt("Enter destination hospital (e.g., Chris Hani Baragwanath):");
     if (hospital) {
-        await fetch(`/api/patient/${id}/transfer?to=${hospital}`, { method: 'POST' });
-        loadHistory(); // Refresh table
-        updateStats();
+        try {
+            await fetch(`/api/patient/${id}/transfer?to=${encodeURIComponent(hospital)}`, {
+                method: 'POST'
+            });
+            loadHistory();
+            updateStats();
+        } catch (error) {
+            console.error("Error transferring patient:", error);
+            alert("Failed to transfer patient. Please try again.");
+        }
     }
 }
 
+// 5. Update Stats
 async function updateStats() {
     try {
         const response = await fetch('/api/stats');
@@ -126,17 +132,14 @@ async function updateStats() {
         wards.forEach(ward => {
             const matchingKey = Object.keys(stats).find(key => key.includes(ward.id));
             const count = matchingKey ? stats[matchingKey] : 0;
-            const percentage = (count / ward.limit) * 100;
+            const percentage = Math.min((count / ward.limit) * 100, 100);
 
-            // Notice the spelling: getElementById
             const textElem = document.getElementById(`stat-${ward.id}`);
             const barElem = document.getElementById(`bar-${ward.id}`);
 
             if (textElem && barElem) {
                 textElem.innerText = `${count} / ${ward.limit}`;
-                barElem.style.width = `${Math.min(percentage, 100)}%`;
-            } else {
-                console.warn(`Missing HTML elements for ward: ${ward.id}`);
+                barElem.style.width = `${percentage}%`;
             }
         });
     } catch (error) {
@@ -144,65 +147,93 @@ async function updateStats() {
     }
 }
 
-// Call this inside window.onload and after every Discharge/Admit
-window.onload = () => {
-    loadHistory();
-    updateStats();
-    setInterval(updateStats, 5000)
-};
-
+// 6. Filter History
 function filterHistory() {
     const input = document.getElementById('historySearch');
     const filter = input.value.toLowerCase();
-    const table = document.querySelector("#historyTable"); // Make sure your table has this ID
+    const table = document.getElementById('historyTable');
     const tr = table.getElementsByTagName('tr');
 
-    // Loop through all rows (skipping the header at index 0)
     for (let i = 1; i < tr.length; i++) {
-        const nameColumn = tr[i].getElementsByTagName('td')[0]; // Name is the first column
+        const nameColumn = tr[i].getElementsByTagName('td')[0];
         if (nameColumn) {
             const txtValue = nameColumn.textContent || nameColumn.innerText;
-            if (txtValue.toLowerCase().indexOf(filter) > -1) {
-                tr[i].style.display = "";
-            } else {
-                tr[i].style.display = "none";
-            }
+            tr[i].style.display = txtValue.toLowerCase().includes(filter) ? "" : "none";
         }
     }
 }
 
-// 3. WebSocket Live Updates
-const protocol = location.protocol === "https:" ? "wss://" : "ws://";
-const ws = new WebSocket(protocol + location.host + "/live-triage");
+// 7. WebSocket Initialization
+function initializeWebSocket() {
+    const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+    const ws = new WebSocket(protocol + window.location.host + "/live-triage");
 
-ws.onmessage = (msg) => {
-    const data = JSON.parse(msg.data);
-    const feed = document.getElementById('feed');
+    ws.onopen = () => {
+        console.log("WebSocket connection established");
+    };
 
-    const div = document.createElement('div');
+    ws.onmessage = (msg) => {
+        try {
+            const data = JSON.parse(msg.data);
+            const feed = document.getElementById('feed');
 
-    const priority = data.level ? data.level.toLowerCase() : 'green' ;
+            if (feed) {
+                const div = document.createElement('div');
+                const priority = (data.level || '').toLowerCase() || 'green';
 
-    div.className = `patient-card ${priority} animate-pulse`;
-    div.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <strong>${data.name}</strong>
-            <span class="status-tag priority-${priority}">${data.level}</span>
-        </div>
-        <div style="margin-top: 5px">
-            <small>Category: <strong>${data.category}</strong></small><br>
-            <small>Staff: ${data.handledBy || 'System'}</small>
-        </div>
-    `;
+                div.className = `patient-card ${priority} animate-pulse`;
+                div.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong>${data.name || 'Unknown'}</strong>
+                        <span class="status-tag priority-${priority}">${data.level || 'UNKNOWN'}</span>
+                    </div>
+                    <div style="margin-top: 5px">
+                        <small>Category: <strong>${data.category || 'N/A'}</strong></small><br>
+                        <small>Staff: ${data.handledBy || 'System'}</small>
+                    </div>
+                `;
 
-    feed.prepend(div);
+                feed.prepend(div);
+                loadHistory();
+                updateStats();
 
+                // Auto-remove alert from feed after 1 hour
+                setTimeout(() => div.remove(), 3600000);
+            }
+        } catch (error) {
+            console.error("Error processing WebSocket message:", error);
+        }
+    };
+
+    ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+    };
+
+    ws.onclose = () => {
+        console.log("WebSocket connection closed. Attempting to reconnect...");
+        setTimeout(initializeWebSocket, 5000); // Try to reconnect after 5 seconds
+    };
+}
+
+// Initialize everything when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', function() {
     loadHistory();
     updateStats();
+    initializeWebSocket();
+    setInterval(updateStats, 5000);
 
-    // auto-remove alert form feed after 1 hour to prevent memory bloat
-    setTimeout(() => div.remove(), 3600000);
-};
+    // Add event listener for the search input
+    const searchInput = document.getElementById('historySearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', filterHistory);
+    }
 
-// Auto-load history on page load
-//window.onload = loadHistory;
+    // Add event listener for the form submission
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            admitPatient();
+        });
+    }
+});

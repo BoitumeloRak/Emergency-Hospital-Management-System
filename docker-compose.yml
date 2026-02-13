@@ -1,0 +1,39 @@
+# docker-compose.yml
+services:
+  activemq:
+    image: rmohr/activemq:5.15.9
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+    environment:
+      - ACTIVEMQ_ADMIN_LOGIN=admin
+      - ACTIVEMQ_ADMIN_PASSWORD=admin
+
+  triage:
+    build: ./triage
+    ports:
+      - "7001:7001"
+    environment:
+      - ACTIVEMQ_BROKER_URL=tcp://activemq:61616
+    depends_on:
+      - activemq
+
+  resource:
+    build: ./resource
+    ports:
+      - "7002:7002"
+    environment:
+      - ACTIVEMQ_BROKER_URL=tcp://activemq:61616
+    depends_on:
+      - activemq
+
+  web:
+    build: ./web
+    ports:
+      - "7070:7070"
+    environment:
+      - ACTIVEMQ_BROKER_URL=tcp://activemq:61616
+    depends_on:
+      - activemq
+      - triage
+      - resource
