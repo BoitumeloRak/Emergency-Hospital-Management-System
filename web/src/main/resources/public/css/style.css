@@ -51,6 +51,11 @@ body {
     letter-spacing: 1px;
     text-transform: uppercase;
     color: #bdc3c7;
+    white-space: nowrap;       /* Prevent text wrapping */
+    overflow: hidden;          /* Hide overflow */
+    text-overflow: ellipsis;   /* Show ellipsis for long text */
+    padding: 0 5px;           /* Add some padding */
+    min-height: 1.2em;        /* Ensure consistent height */
 }
 .stat-card p {
     font-size: 1.5rem;
