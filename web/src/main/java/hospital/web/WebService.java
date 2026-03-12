@@ -58,28 +58,12 @@ public class WebService {
         app.post("/admit-patient", ctx -> {
             TriageEvent event = ctx.bodyAsClass(TriageEvent.class);
 
-            // Security layer: Log the actual network source
-            //String ipAddress = ctx.ip();
-            //String userAgent = ctx.header("User-Agent");
-
-            // Attach this to the event (requires adding fields to TriageEvent.java)
-            // event.setSourceIp(ipAddress);
-
-            //System.out.println("Alert: Patient admitted from IP: " + ipAddress + " by " + event.getHandledBy());
-
-            //String staff = ctx.sessionAttribute("currentUser");
             String staff = ctx.sessionAttribute("currentUser");
 
             if (staff == null) {
                 staff = "Default admin";
             }
             event.setHandledBy(staff);
-
-                //ctx.status(403).result("You must be logged un to admit patients");
-                //return;
-            //}
-           // TriageEvent event = ctx.bodyAsClass(TriageEvent.class);
-            //event.setHandleBy(staff); // Log WHO did the work
 
             // Send to MQ immediately
             MessageProducer producer = session.createProducer(topic);

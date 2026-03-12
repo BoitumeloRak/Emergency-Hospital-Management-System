@@ -13,10 +13,17 @@ services:
     build: ./triage
     ports:
       - "7001:7001"
+
     environment:
       - ACTIVEMQ_BROKER_URL=tcp://activemq:61616
     depends_on:
       - activemq
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:7001/admit" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   resource:
     build: ./resource
@@ -27,13 +34,15 @@ services:
     depends_on:
       - activemq
 
+
   web:
     build: ./web
     ports:
-      - "7070:7070"
+      - "7002:7002"
     environment:
       - ACTIVEMQ_BROKER_URL=tcp://activemq:61616
     depends_on:
       - activemq
       - triage
       - resource
+

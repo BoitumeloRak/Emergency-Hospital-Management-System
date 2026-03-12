@@ -2,6 +2,7 @@ package hospital.triage;
 
 import hospital.common.HospitalMQ;
 import hospital.common.TriageEvent;
+
 import io.javalin.Javalin;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
