@@ -31,4 +31,17 @@
             <version>2.0.7</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.6.3</version>
+                <configuration>
+                    <mainClass>hospital.triage.TriageService</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
