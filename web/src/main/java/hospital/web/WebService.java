@@ -22,7 +22,7 @@ public class WebService {
 
 
     public static void main(String[] args) throws JMSException {
-        String brokeUrl = System.getenv().getOrDefault("SPRING_ACTIVEMQ_BROKER_URL", "tcp://localhost:61616");
+        String brokeUrl = System.getenv().getOrDefault("ACTIVEMQ_BROKER_URL", "tcp://172.24.0.1:61616");
         // 3. Connect to ActiveMQ to CONSUME events
         ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(brokeUrl);
         factory.setTrustAllPackages(true);
