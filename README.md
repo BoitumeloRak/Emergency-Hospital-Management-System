@@ -4,17 +4,17 @@
 
 ---
 
-## 🌟 The Problem & Solution
+## The Problem & Solution
 In busy South African hospitals, communication delays between **Triage** (the front door) and the **ICU/Wards** (the resources) can be life-threatening. 
 
-**HECS** bridges this gap by using an **Event-Driven Architecture**. When a nurse admits a patient, the information is "pushed" via a Message Broker to dashboards across the hospital—ensuring that ICU beds are prepared before the patient even leaves the triage room.
+**HECS** bridges this gap by using an **Event-Driven Architecture**. When a nurse admits a patient, the information is pushed via a Message Broker to dashboards across the hospital-ensuring that ICU beds are prepared before the patient even leaves the triage room.
 
 ---
 
-## 🏗 System Architecture
+## System Architecture
 This project is built as a **Maven Multi-Module** system to ensure services are **Loosely Coupled**.
 
-### 🔹 Service Breakdown
+### Service Breakdown
 * **`common/`**: The **Data Contract**. Contains shared objects like `TriageEvent`.
 * **`triage-service/`**: The **Producer**. A REST-based service (**Port 7001**) for patient intake.
 * **`resource-service/`**: The **Consumer**. A logic engine (**Port 7002**) tracking bed availability & persistent storage (SQLite).
@@ -35,7 +35,7 @@ We use a **Topic (Pub-Sub)** model for the `TRIAGE_TOPIC`. This follows the **So
 
 ---
 
-### 🛠 Tech Stack
+### Tech Stack
 
 - Backend: Java 17, Maven, SparkJava (REST)
 
@@ -45,7 +45,7 @@ We use a **Topic (Pub-Sub)** model for the `TRIAGE_TOPIC`. This follows the **So
 
 - Frontend: HTML5/CSS3 (Flexbox), JavaScript (WebSockets)
 
-### 🚀 Future Roadmap: Phase 2
+### Future Roadmap: Phase 2
 Based on our current build, the following enhancements are planned to make the system "Production-Ready":
 
 1. **Enhanced Security:** Implementation of **JWT (JSON Web Tokens)** for secure staff login and **Data Encryption** for sensitive patient records (POPI Act compliance).
